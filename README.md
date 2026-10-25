@@ -8,7 +8,7 @@ a FastAPI backend, a React dashboard, an Excel export with live formulas, Databr
 > capacity by line. It is not real company data and nothing here describes a real business.
 
 * **Repo:** https://github.com/HxrshRaj/Aapurti
-* **Live demo:** _not yet deployed, see [Publishing](#publishing-and-live-demo)_
+* **Live demo:** https://aapurti.onrender.com (Render free plan: the first request after idle can take a minute)
 
 ## What it demonstrates
 
@@ -222,12 +222,10 @@ column `measures.dax` references exists in the exports; the DAX is exercised onl
 
 ## Publishing and live demo
 
-The repo is published at https://github.com/HxrshRaj/Aapurti. It has **not** been deployed yet, so there is no live link. The GitHub Actions
-workflow (PySpark tests with Java, backend tests, frontend tests and build) passes on `main`; the Docker image build has not been run. To deploy:
-
-```bash
-# Render: New > Blueprint > pick the repo (render.yaml + Dockerfile are included). The image bundles frontend/dist and data/serving/aapurti.db.
-```
+The repo is published at https://github.com/HxrshRaj/Aapurti and deployed on Render at https://aapurti.onrender.com
+(checked: `/api/health`, `/api/kpis`, the dashboard page and `/export.xlsx` all return 200). The GitHub Actions workflow
+(PySpark tests with Java, backend tests, frontend tests and build) passes on `main`. Deploy steps: Render > New > Blueprint >
+pick the repo (`render.yaml` and the `Dockerfile` are included).
 
 The committed `data/serving/aapurti.db` is what the demo serves; regenerate it with `python scripts/run_all.py`.
 Render's free plan sleeps when idle, so the first request after a pause is slow.
