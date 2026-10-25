@@ -221,8 +221,8 @@ column `measures.dax` references exists in the exports; the DAX itself has not b
 
 ## Publishing and live demo
 
-The repo is published at https://github.com/HxrshRaj/Aapurti. It has **not** been deployed yet, so there is no live link, and the
-GitHub Actions workflow and the Docker image build have not been run yet. To deploy:
+The repo is published at https://github.com/HxrshRaj/Aapurti. It has **not** been deployed yet, so there is no live link. The GitHub Actions
+workflow (PySpark tests with Java, backend tests, frontend tests and build) passes on `main`; the Docker image build has not been run. To deploy:
 
 ```bash
 # Render: New > Blueprint > pick the repo (render.yaml + Dockerfile are included). The image bundles frontend/dist and data/serving/aapurti.db.
