@@ -210,14 +210,15 @@ forecast, actual).
 ### Databricks
 
 `databricks/*.py` are Databricks source-format notebooks (`# COMMAND ----------` cells) that call the same tested modules
-(`00_setup` ... `05_validate`). A test checks they parse and that every `aapurti` import resolves. **They have not been imported
-into or run on a Databricks workspace.** Delta is the default format in the notebooks.
+(`00_setup` ... `05_validate`). A test checks they parse and that every `aapurti` import resolves. The author has imported and run them on a
+Databricks workspace (reported by the author; no run logs or screenshots are committed, and the benchmark numbers above are from the
+local Spark run, not Databricks). Delta is the default format in the notebooks.
 
 ### Power BI
 
-`powerbi/` has the star-schema CSVs (`powerbi/data/`), `DATA_MODEL.md`, `measures.dax` and step-by-step build instructions. **No
-`.pbix` was built, and Power BI was not used or verified here.** A test checks that the exports have valid keys and that every
-column `measures.dax` references exists in the exports; the DAX itself has not been executed.
+`powerbi/` has the star-schema CSVs (`powerbi/data/`), `DATA_MODEL.md`, `measures.dax` and step-by-step build instructions. The author has loaded the exports and
+built a report in Power BI Desktop (reported by the author; the `.pbix` is not committed). A test also checks that the exports have valid keys and that every
+column `measures.dax` references exists in the exports; the DAX is exercised only in that Power BI Desktop run.
 
 ## Publishing and live demo
 
@@ -233,11 +234,11 @@ Render's free plan sleeps when idle, so the first request after a pause is slow.
 
 ## Honest limits
 
-* **Local Spark, not a Databricks cluster.** Everything ran on one machine in `local[*]` mode. The notebooks are untested on
-  Databricks.
+* **Benchmarks are from local Spark, not a Databricks cluster.** All timings and results above ran on one machine in `local[*]`
+  mode. The notebooks were run on Databricks separately, with no cluster-scale benchmark.
 * **Delta Lake:** works locally behind `--format delta` (one test runs the fixture through it with `delta-spark` 3.2.1). The
   default and the numbers above use Parquet. Nothing here exercises Delta features such as MERGE, time travel or OPTIMIZE.
-* **Power BI was not built or verified.** Only the exports, model description and DAX are provided.
+* **Power BI:** built by the author in Power BI Desktop, but no `.pbix` or screenshots are committed, so it can't be verified from this repo.
 * **Synthetic data only.** Generated from the same structure the models learn, so accuracy is optimistic. Quarantine reasons are
   injected, not discovered.
 * **Not production scale.** About 82k demand rows, 86k movements, 75 series. Run times are for this size on a laptop; no claim
