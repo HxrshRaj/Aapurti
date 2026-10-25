@@ -1,0 +1,5 @@
+sku_id,category,volume_class,unit_cost,supplier_id,sku_name
+SA,Valves,A,10,SUP01,Valve SA
+SB,Valves,B,20,SUP01,Valve SB
+SC,Pumps,C,5,SUP01,Pump SC
+SD,Pumps,B,8,SUP01,Pump SD

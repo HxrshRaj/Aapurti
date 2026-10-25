@@ -1,0 +1,7 @@
+capacity_date,plant_id,line_id,available_hours,run_hours,downtime_hours,units_produced
+2025-12-01,P01,P01-L1,24,18,0,900
+2025-12-02,P01,P01-L1,24,12,2,600
+2025-12-03,P01,P01-L1,24,24,0,1200
+2025-12-04,P01,P01-L1,24,6,1,300
+2025-12-05,P01,P01-L1,24,30,0,0
+2025-12-01,P01,P01-L1,24,18,0,900

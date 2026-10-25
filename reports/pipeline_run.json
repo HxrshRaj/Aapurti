@@ -1,0 +1,33 @@
+{
+  "batch_id": "20261025T144512",
+  "as_of": "2025-12-31",
+  "format": "parquet",
+  "counts": {
+    "bronze.plants": 3,
+    "bronze.suppliers": 8,
+    "bronze.skus": 48,
+    "bronze.lines": 9,
+    "bronze.inventory_opening": 75,
+    "bronze.demand_daily": 82528,
+    "bronze.machine_capacity": 9864,
+    "bronze.inventory_movements": 85992,
+    "silver.demand_daily": 80556,
+    "silver.inventory_movements": 84639,
+    "silver.machine_capacity": 9834,
+    "silver.quarantine": 3355,
+    "silver.plants": 3,
+    "silver.suppliers": 8,
+    "silver.skus": 48,
+    "silver.lines": 9,
+    "silver.inventory_opening": 75,
+    "gold.daily_demand": 80556,
+    "gold.inventory_position": 75,
+    "gold.capacity_utilization": 324
+  },
+  "timings_s": {
+    "bronze_s": 33.58,
+    "silver_s": 41.82,
+    "gold_s": 16.01,
+    "total_s": 91.41
+  }
+}

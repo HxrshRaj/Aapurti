@@ -1,0 +1,10 @@
+{
+  "rows": {
+    "demand": 82528,
+    "movements": 85992,
+    "capacity": 9864,
+    "series": 75
+  },
+  "clean_demand_units": 9292090,
+  "seconds": 3.9
+}

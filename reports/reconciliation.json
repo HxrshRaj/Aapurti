@@ -1,0 +1,147 @@
+{
+  "checks": [
+    {
+      "check": "rows: demand_daily",
+      "source": 82528.0,
+      "pipeline": 80556.0,
+      "quarantined": 1972.0,
+      "unexplained_variance": 0.0,
+      "ok": true,
+      "note": "bronze rows = 82528; source rows = silver rows + quarantined rows"
+    },
+    {
+      "check": "rows: machine_capacity",
+      "source": 9864.0,
+      "pipeline": 9834.0,
+      "quarantined": 30.0,
+      "unexplained_variance": 0.0,
+      "ok": true,
+      "note": "bronze rows = 9864; source rows = silver rows + quarantined rows"
+    },
+    {
+      "check": "rows: inventory_movements",
+      "source": 85992.0,
+      "pipeline": 84639.0,
+      "quarantined": 1353.0,
+      "unexplained_variance": 0.0,
+      "ok": true,
+      "note": "bronze rows = 85992; source rows = silver rows + quarantined rows"
+    },
+    {
+      "check": "demand units (total)",
+      "source": 337209758.0,
+      "pipeline": 9108890.0,
+      "quarantined": 328100868.0,
+      "unexplained_variance": 0.0,
+      "ok": true,
+      "note": "source = gold + units in quarantined rows (duplicates, orphans, negatives, out-of-range)"
+    },
+    {
+      "check": "inventory net movement (units)",
+      "source": -66456.0,
+      "pipeline": -34994.0,
+      "quarantined": -31462.0,
+      "unexplained_variance": 0.0,
+      "ok": true,
+      "note": "rows with an unrecognised movement type contribute 0 to the signed net on both sides"
+    },
+    {
+      "check": "capacity run_hours",
+      "source": 92217.04000000001,
+      "pipeline": 91631.91,
+      "quarantined": 585.13,
+      "unexplained_variance": 4.661160346586257e-12,
+      "ok": true,
+      "note": "source = gold + hours in quarantined rows (run>available, negatives, duplicates)"
+    },
+    {
+      "check": "inventory on_hand (gold vs pandas recompute)",
+      "source": 168305.0,
+      "pipeline": 168305.0,
+      "quarantined": 0.0,
+      "unexplained_variance": 0.0,
+      "ok": true,
+      "note": "opening + signed movements up to as-of, recomputed with pandas"
+    },
+    {
+      "check": "avg daily demand 28d (gold vs pandas recompute)",
+      "source": 8732.250000000002,
+      "pipeline": 8732.250000000002,
+      "quarantined": 0.0,
+      "unexplained_variance": 0.0,
+      "ok": true,
+      "note": "sum of units in trailing 28 days / 28"
+    }
+  ],
+  "all_ok": true,
+  "quarantined_units_by_reason": {
+    "duplicate": 39477.0,
+    "invalid_date": 31805.0,
+    "negative_units": -7633.0,
+    "null_units": 0.0,
+    "units_out_of_range": 327999672.0,
+    "unknown_sku": 37547.0
+  },
+  "quarantine_rows_by_reason": [
+    {
+      "source_table": "demand_daily",
+      "reason": "duplicate",
+      "rows": 325
+    },
+    {
+      "source_table": "demand_daily",
+      "reason": "invalid_date",
+      "rows": 334
+    },
+    {
+      "source_table": "demand_daily",
+      "reason": "negative_units",
+      "rows": 329
+    },
+    {
+      "source_table": "demand_daily",
+      "reason": "null_units",
+      "rows": 328
+    },
+    {
+      "source_table": "demand_daily",
+      "reason": "units_out_of_range",
+      "rows": 328
+    },
+    {
+      "source_table": "demand_daily",
+      "reason": "unknown_sku",
+      "rows": 328
+    },
+    {
+      "source_table": "inventory_movements",
+      "reason": "duplicate",
+      "rows": 338
+    },
+    {
+      "source_table": "inventory_movements",
+      "reason": "invalid_movement_type",
+      "rows": 339
+    },
+    {
+      "source_table": "inventory_movements",
+      "reason": "null_quantity",
+      "rows": 338
+    },
+    {
+      "source_table": "inventory_movements",
+      "reason": "unknown_plant",
+      "rows": 338
+    },
+    {
+      "source_table": "machine_capacity",
+      "reason": "negative_hours",
+      "rows": 15
+    },
+    {
+      "source_table": "machine_capacity",
+      "reason": "run_exceeds_available",
+      "rows": 15
+    }
+  ]
+}

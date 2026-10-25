@@ -1,0 +1,31 @@
+table,key,field,expected,tolerance,hand_working
+inventory_position,P01|SA,on_hand,300,0,400 opening + 200 receipt - 280 issues (28 x 10) - 20 adjustment; the 2026-01-02 receipt is after as-of and excluded
+inventory_position,P01|SA,avg_daily_demand,10,1e-9,280 / 28
+inventory_position,P01|SA,days_of_cover,30,1e-9,300 / 10
+inventory_position,P01|SA,safety_stock,0,1e-9,demand has zero variance
+inventory_position,P01|SA,reorder_point,40,1e-9,10 * 4 + 0
+inventory_position,P01|SA,stockout_risk,LOW,0,
+inventory_position,P01|SB,on_hand,20,0,100 + 200 - 280 (8/12 alternating: 14 x 8 + 14 x 12 = 280)
+inventory_position,P01|SB,avg_daily_demand,10,1e-9,280 / 28
+inventory_position,P01|SB,days_of_cover,2,1e-9,20 / 10
+inventory_position,P01|SB,demand_sigma,2,1e-9,population std of values alternating 8/12 around mean 10
+inventory_position,P01|SB,safety_stock,6.6,1e-9,1.65 * 2 * sqrt(4)
+inventory_position,P01|SB,reorder_point,46.6,1e-9,10 * 4 + 6.6
+inventory_position,P01|SB,stockout_risk,HIGH,0,2d cover < 4d lead time
+inventory_position,P01|SC,on_hand,50,0,opening only; no movements
+inventory_position,P01|SC,days_of_cover,,0,null: no demand
+inventory_position,P01|SC,stockout_risk,LOW,0,
+inventory_position,P01|SD,on_hand,45,0,75 + 250 - 280
+inventory_position,P01|SD,days_of_cover,4.5,1e-9,45 / 10
+inventory_position,P01|SD,reorder_point,46.6,1e-9,10 * 4 + 6.6
+inventory_position,P01|SD,stockout_risk,MEDIUM,0,cover 4.5d >= 4d but 45 < 46.6
+capacity_utilization,2025-12|P01-L1,available_hours,96,0,4 days x 24
+capacity_utilization,2025-12|P01-L1,run_hours,60,0,18 + 12 + 24 + 6
+capacity_utilization,2025-12|P01-L1,downtime_hours,3,0,0 + 2 + 0 + 1
+capacity_utilization,2025-12|P01-L1,utilization,0.625,1e-12,60 / 96
+quarantine,demand_daily|negative_units,rows,1,0,the -5 row on 2025-11-30
+quarantine,demand_daily|duplicate,rows,1,0,repeat of SA on 2025-12-04
+quarantine,demand_daily|unknown_sku,rows,1,0,SKU SX not in dimension
+quarantine,inventory_movements|duplicate,rows,1,0,movement M001 repeated
+quarantine,machine_capacity|run_exceeds_available,rows,1,0,30h run on 24h available
+quarantine,machine_capacity|duplicate,rows,1,0,line L1 on 2025-12-01 repeated

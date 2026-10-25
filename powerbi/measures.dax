@@ -1,0 +1,72 @@
+// Aapurti: DAX measures for Power BI Desktop. SYNTHETIC data.
+// NOT built or verified in Power BI from this repository: the .pbix was not created.
+// Table names match powerbi/data/*.csv (see DATA_MODEL.md). Relationships are described there.
+
+// ---------- Demand ----------
+Total Units = SUM ( fact_daily_demand[units] )
+
+Units LY =
+CALCULATE ( [Total Units], SAMEPERIODLASTYEAR ( dim_date[date] ) )
+
+Units YoY % =
+VAR ly = [Units LY]
+RETURN IF ( ly = 0 || ISBLANK ( ly ), BLANK (), DIVIDE ( [Total Units] - ly, ly ) )
+
+Promo Uplift % =
+VAR promo = CALCULATE ( AVERAGE ( fact_daily_demand[units] ), fact_daily_demand[promo_flag] = 1 )
+VAR base  = CALCULATE ( AVERAGE ( fact_daily_demand[units] ), fact_daily_demand[promo_flag] = 0 )
+RETURN DIVIDE ( promo - base, base )
+
+// ---------- Forecast accuracy (held-out window only: rows with an actual) ----------
+Forecast Units = SUM ( fact_forecast[forecast] )
+
+Actual Units (held-out) =
+CALCULATE ( SUM ( fact_forecast[actual] ), fact_forecast[is_future] = FALSE () )
+
+Absolute Error =
+SUMX (
+    FILTER ( fact_forecast, NOT ISBLANK ( fact_forecast[actual] ) ),
+    ABS ( fact_forecast[actual] - fact_forecast[forecast] )
+)
+
+Forecast WAPE = DIVIDE ( [Absolute Error], [Actual Units (held-out)] )
+
+Forecast Accuracy = 1 - [Forecast WAPE]
+
+Forecast Bias % = DIVIDE ( SUMX ( FILTER ( fact_forecast, NOT ISBLANK ( fact_forecast[actual] ) ), fact_forecast[forecast] ) - [Actual Units (held-out)], [Actual Units (held-out)] )
+
+// ---------- Inventory ----------
+On Hand = SUM ( fact_inventory_position[on_hand] )
+
+Avg Daily Demand = SUM ( fact_inventory_position[avg_daily_demand] )
+
+// Portfolio days of cover: total on hand / total daily demand (a ratio of sums, not an average of ratios).
+Days of Cover = DIVIDE ( [On Hand], [Avg Daily Demand] )
+
+// Row-level days of cover for tables/matrices at SKU-plant grain (BLANK when there is no demand).
+Days of Cover (SKU) =
+AVERAGEX ( fact_inventory_position, DIVIDE ( fact_inventory_position[on_hand], fact_inventory_position[avg_daily_demand] ) )
+
+High Risk SKUs =
+CALCULATE ( COUNTROWS ( fact_inventory_position ), fact_inventory_position[stockout_risk] = "HIGH" )
+
+Medium Risk SKUs =
+CALCULATE ( COUNTROWS ( fact_inventory_position ), fact_inventory_position[stockout_risk] = "MEDIUM" )
+
+// Stockout risk % = share of SKU-plants whose cover is shorter than supplier lead time
+Stockout Risk % = DIVIDE ( [High Risk SKUs], COUNTROWS ( fact_inventory_position ) )
+
+Inventory Value = SUM ( fact_inventory_position[inventory_value] )
+
+// ---------- Capacity ----------
+Run Hours = SUM ( fact_capacity_monthly[run_hours] )
+Available Hours = SUM ( fact_capacity_monthly[available_hours] )
+
+// Ratio of sums so that months/lines with different available hours are weighted correctly.
+Utilization = DIVIDE ( [Run Hours], [Available Hours] )
+
+Lines Over 90% =
+COUNTROWS ( FILTER ( VALUES ( fact_capacity_monthly[line_id] ), [Utilization] > 0.9 ) )
+
+Utilization LY =
+CALCULATE ( [Utilization], SAMEPERIODLASTYEAR ( dim_date[date] ) )

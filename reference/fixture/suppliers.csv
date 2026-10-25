@@ -1,0 +1,2 @@
+supplier_id,supplier_name,lead_time_days,reliability
+SUP01,Test Supplier,4,0.95

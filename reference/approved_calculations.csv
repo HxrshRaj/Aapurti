@@ -1,0 +1,15 @@
+metric,case_id,inputs,expected,tolerance,hand_working
+days_of_cover,DOC-1,on_hand=300;avg_daily_demand=10,30,0,300 / 10
+days_of_cover,DOC-2,on_hand=0;avg_daily_demand=10,0,0,0 / 10
+days_of_cover,DOC-3,on_hand=125;avg_daily_demand=25,5,0,125 / 25
+days_of_cover,DOC-4,on_hand=50;avg_daily_demand=0,,0,undefined when demand is 0 (reported as null)
+safety_stock,SS-1,z=1.65;sigma=2;lead_time_days=4,6.6,1e-9,1.65 * 2 * sqrt(4) = 1.65 * 2 * 2
+safety_stock,SS-2,z=1.65;sigma=5;lead_time_days=9,24.75,1e-9,1.65 * 5 * sqrt(9) = 1.65 * 5 * 3
+safety_stock,SS-3,z=1.65;sigma=0;lead_time_days=16,0,0,0 demand variability => 0
+utilization,UT-1,run_hours=60;available_hours=96,0.625,1e-12,60 / 96
+utilization,UT-2,run_hours=16;available_hours=16,1,0,16 / 16
+utilization,UT-3,run_hours=0;available_hours=8,0,0,0 / 8
+utilization,UT-4,run_hours=5;available_hours=0,,0,undefined when no available hours (null)
+stockout_risk,RK-1,on_hand=20;avg_daily_demand=10;lead_time_days=4;reorder_point=46.6,HIGH,0,cover 2d < lead time 4d
+stockout_risk,RK-2,on_hand=45;avg_daily_demand=10;lead_time_days=4;reorder_point=46.6,MEDIUM,0,cover 4.5d >= 4d but 45 < 46.6
+stockout_risk,RK-3,on_hand=300;avg_daily_demand=10;lead_time_days=4;reorder_point=40,LOW,0,cover 30d and 300 >= 40

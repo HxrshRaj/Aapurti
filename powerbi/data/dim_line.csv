@@ -1,0 +1,10 @@
+line_id,plant_id,rated_units_per_hour
+P01-L1,P01,45
+P01-L2,P01,90
+P01-L3,P01,45
+P02-L1,P02,90
+P02-L2,P02,30
+P02-L3,P02,30
+P03-L1,P03,30
+P03-L2,P03,45
+P03-L3,P03,90

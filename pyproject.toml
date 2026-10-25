@@ -1,0 +1,13 @@
+[project]
+name = "aapurti"
+version = "0.1.0"
+description = "Synthetic-data supply-chain analytics platform (PySpark, FastAPI, React)"
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning", "ignore::UserWarning"]

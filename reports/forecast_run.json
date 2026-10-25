@@ -1,0 +1,42 @@
+{
+  "series": 75,
+  "origins": [
+    "2025-07-16",
+    "2025-08-13",
+    "2025-09-10",
+    "2025-10-08",
+    "2025-11-05",
+    "2025-12-03"
+  ],
+  "horizon": 28,
+  "seconds": 448.9,
+  "winners": [
+    {
+      "volume_class": "A",
+      "winner": "gradient_boosting",
+      "wape": 0.12501122909562024,
+      "mape": 0.13020517322516723,
+      "rmse": 59.98910789998956,
+      "best_baseline_wape": 0.22248117184261773,
+      "beats_best_baseline": true
+    },
+    {
+      "volume_class": "B",
+      "winner": "gradient_boosting",
+      "wape": 0.14042770946424954,
+      "mape": 0.15069362578806889,
+      "rmse": 19.66089219435918,
+      "best_baseline_wape": 0.20979823163172165,
+      "beats_best_baseline": true
+    },
+    {
+      "volume_class": "C",
+      "winner": "gradient_boosting",
+      "wape": 0.22498680388795939,
+      "mape": 0.29838689624457343,
+      "rmse": 5.22470707185313,
+      "best_baseline_wape": 0.31403269662845534,
+      "beats_best_baseline": true
+    }
+  ]
+}
