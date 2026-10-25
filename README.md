@@ -7,7 +7,7 @@ a FastAPI backend, a React dashboard, an Excel export with live formulas, Databr
 > suppliers, daily demand (trend + weekly and annual seasonality + noise + promo spikes), inventory movements and machine
 > capacity by line. It is not real company data and nothing here describes a real business.
 
-* **Repo:** _not yet published, see [Publishing](#publishing-and-live-demo)_
+* **Repo:** https://github.com/HxrshRaj/Aapurti
 * **Live demo:** _not yet deployed, see [Publishing](#publishing-and-live-demo)_
 
 ## What it demonstrates
@@ -221,12 +221,10 @@ column `measures.dax` references exists in the exports; the DAX itself has not b
 
 ## Publishing and live demo
 
-The repo was built and tested locally. Publishing and deploying need accounts that this environment is not signed in to (`gh` is
-not authenticated), so there is no repo URL and no live link yet. Everything needed is in place:
+The repo is published at https://github.com/HxrshRaj/Aapurti. It has **not** been deployed yet, so there is no live link, and the
+GitHub Actions workflow and the Docker image build have not been run yet. To deploy:
 
 ```bash
-gh auth login
-gh repo create Aapurti --public --source . --push
 # Render: New > Blueprint > pick the repo (render.yaml + Dockerfile are included). The image bundles frontend/dist and data/serving/aapurti.db.
 ```
 
