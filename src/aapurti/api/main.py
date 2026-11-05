@@ -7,11 +7,15 @@ import sqlite3
 from pathlib import Path
 
 import pandas as pd
-from fastapi import FastAPI, HTTPException, Query, Response
+import threading
+import uuid
+
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .. import config
+from .. import emissions, ml_forecast
 from ..excel import build_workbook
 
 DB_ENV = "AAPURTI_DB"
@@ -42,7 +46,7 @@ def meta() -> dict:
 
 
 app = FastAPI(title="Aapurti API", description=config.SYNTHETIC_NOTICE, version="0.1.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
 @app.get("/api/health")
@@ -158,6 +162,65 @@ def data_quality():
 def backtest():
     return {"results": records(q("SELECT * FROM backtest_results ORDER BY volume_class, wape")),
             "winners": records(q("SELECT * FROM model_selection"))}
+
+
+@app.get("/api/emissions")
+def emissions_estimate(transport_km: float = Query(emissions.DEFAULT_TRANSPORT_KM, ge=0, le=20000),
+                       days: int = Query(90, ge=1, le=1100), plant_id: str | None = None):
+    """ILLUSTRATIVE carbon estimate (kg CO2e) from synthetic demand and placeholder emission factors."""
+    where = "WHERE d.demand_date > date((SELECT MAX(demand_date) FROM fact_daily_demand), ?)"
+    params: list = [f"-{int(days)} day"]
+    if plant_id:
+        where += " AND d.plant_id = ?"; params.append(plant_id)
+    df = q(f"""SELECT k.category AS category, SUM(d.units) AS units
+               FROM fact_daily_demand d JOIN dim_sku k USING (sku_id) {where} GROUP BY k.category""", tuple(params))
+    est = emissions.estimate(df, transport_km)
+    return {"window_days": days, "transport_km": transport_km, "by_category": records(est),
+            "total_kg_co2e": float(est["total_kg"].sum()),
+            "notice": "Illustrative: placeholder emission factors on synthetic data. Not an audited footprint."}
+
+
+_JOBS: dict[str, dict] = {}
+_JOBS_LOCK = threading.Lock()
+MAX_JOBS = 200
+
+
+def _run_job(job_id: str, dates: list[str], units: list[float], horizon: int) -> None:
+    try:
+        result = ml_forecast.forecast_series(dates, units, horizon)
+        update = {"status": "done", "result": result}
+    except Exception as e:   # surfaced to the caller through the job record
+        update = {"status": "failed", "error": str(e)}
+    with _JOBS_LOCK:
+        _JOBS[job_id].update(update)
+
+
+@app.post("/api/forecast/jobs", status_code=202)
+def create_forecast_job(background: BackgroundTasks, sku_id: str, plant_id: str, horizon: int = Query(14, ge=1, le=90)):
+    """Start an ML forecast for one SKU-plant in the background; poll GET /api/forecast/jobs/{id}."""
+    df = q("""SELECT demand_date AS date, units FROM fact_daily_demand WHERE sku_id = ? AND plant_id = ?
+              ORDER BY demand_date""", (sku_id, plant_id))
+    if df.empty:
+        raise HTTPException(404, f"No demand history for sku {sku_id} at plant {plant_id}")
+    if len(df) < ml_forecast.MIN_HISTORY:
+        raise HTTPException(422, f"Need at least {ml_forecast.MIN_HISTORY} days of history, got {len(df)}")
+    job_id = uuid.uuid4().hex[:12]
+    with _JOBS_LOCK:
+        if len(_JOBS) >= MAX_JOBS:
+            _JOBS.pop(next(iter(_JOBS)))
+        _JOBS[job_id] = {"id": job_id, "status": "running", "sku_id": sku_id, "plant_id": plant_id, "horizon": horizon}
+    background.add_task(_run_job, job_id, df["date"].tolist(), df["units"].astype(float).tolist(), horizon)
+    return {"id": job_id, "status": "running"}
+
+
+@app.get("/api/forecast/jobs/{job_id}")
+def get_forecast_job(job_id: str):
+    with _JOBS_LOCK:
+        job = _JOBS.get(job_id)
+        job = dict(job) if job else None
+    if job is None:
+        raise HTTPException(404, "Unknown job id")
+    return job
 
 
 @app.get("/export.xlsx")

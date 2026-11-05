@@ -200,6 +200,12 @@ are downloaded from Maven on first use).
 API: `GET /api/kpis`, `/api/forecast?sku_id=&plant_id=`, `/api/inventory/risk`, `/api/capacity`, `/api/data-quality`,
 `/api/backtest`, `/api/filters`, `/api/health`, and `GET /export.xlsx`. OpenAPI docs at `/docs`.
 
+**Emissions and on-demand ML forecast**
+
+- `GET /api/emissions?days=90&transport_km=400&plant_id=` returns an *illustrative* kg CO2e estimate per category (production + transport) from the synthetic demand. The emission factors are placeholders in `src/aapurti/emissions.py`, not audited values, so treat it as a demonstration of the calculation and API shape.
+- `POST /api/forecast/jobs?sku_id=&plant_id=&horizon=14` starts a background job that fits a scikit-learn gradient-boosting model on that series and returns `202` with a job id; poll `GET /api/forecast/jobs/{id}` for `running`, `done` (forecast plus a seasonal-naive baseline) or `failed`. Jobs are held in process memory (capped at 200), so they do not survive a restart or span multiple workers.
+- Tests: `tests/test_emissions_and_jobs.py`.
+
 ### Excel output
 
 `/export.xlsx` returns a workbook with a Summary sheet, one sheet per plant, real formulas (days of cover, reorder point, risk,
