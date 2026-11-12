@@ -244,6 +244,30 @@ single-month query uses a partition filter instead of scanning every partition.
 top category and share, rolling average, pruning). Limits: this is Spark's local Hive metastore on one machine, not a Hadoop or
 Hive cluster, and not Redshift, Impala or EMR.
 
+## Streaming and query plans
+
+**Structured Streaming** (`src/aapurti/pipeline/streaming.py`). Inventory-movement events (CSV files dropped in a directory) are aggregated into
+**tumbling one-hour event-time windows** per plant and movement type, with a **10-minute watermark**. Window results are upserted by key in
+`foreachBatch`, so a replayed micro-batch does not double count. The query runs with `trigger(availableNow=True)`: it drains the new files and
+stops, and the **checkpoint keeps window state and the watermark across restarts**.
+
+```bash
+python -m aapurti.pipeline.streaming --input data/stream_in --checkpoint data/stream_ckpt --out data/stream_windows.json
+```
+
+**Join strategies from the physical plan** (`src/aapurti/pipeline/plans.py`). The same join is planned with broadcast joins allowed and then disabled.
+The report counts shuffle (`Exchange`) and broadcast nodes and checks that both strategies return the same rows and total:
+
+```bash
+python -m aapurti.pipeline.plans --lake data/lake
+```
+
+`tests/test_streaming_and_plans.py` covers window counts and sums per key, a second file updating an open window without double counting,
+a late event being dropped after a restart because the watermark came from the checkpoint (the test fails if the watermark is removed), an event
+inside the delay being accepted, a broadcast join having no shuffles while a sort-merge join shuffles both sides with identical results, and the
+session settings being restored afterwards. Limits: local Spark on one machine, file source only (no Kafka), an in-memory result store for the demo,
+and adaptive query execution is switched off while comparing plans so the plan is not re-optimised at run time.
+
 ## Publishing and live demo
 
 The repo is published at https://github.com/HxrshRaj/Aapurti and deployed on Render at https://aapurti.onrender.com
@@ -264,7 +288,7 @@ Render's free plan sleeps when idle, so the first request after a pause is slow.
 * **Synthetic data only.** Generated from the same structure the models learn, so accuracy is optimistic. Quarantine reasons are
   injected, not discovered.
 * **Not production scale.** About 82k demand rows, 86k movements, 75 series. Run times are for this size on a laptop; no claim
-  is made about large clusters. No streaming, no orchestration, no authentication on the API, no incremental loads.
+  is made about large clusters. Streaming is limited to the file-source demo above (no Kafka); no orchestration, no authentication on the API, no incremental loads.
 * **Single inventory snapshot.** Inventory is a position as of 2025-12-31, not a history, so there is no inventory trend.
 * **Forecast scope.** Daily SKU-plant demand, 28-day horizon, promo calendar assumed known for backtests and absent for the future
   window. Holt-Winters uses a weekly cycle only (annual seasonality is learned only by gradient boosting through calendar features).
