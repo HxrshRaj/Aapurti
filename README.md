@@ -226,6 +226,24 @@ local Spark run, not Databricks). Delta is the default format in the notebooks.
 built a report in Power BI Desktop (reported by the author; the `.pbix` is not committed). A test also checks that the exports have valid keys and that every
 column `measures.dax` references exists in the exports; the DAX is exercised only in that Power BI Desktop run.
 
+## SQL warehouse on a Hive metastore
+
+`src/aapurti/pipeline/warehouse.py` loads the lake into a small star schema in a local Hive metastore (embedded Derby, no server):
+`dim_sku` and `dim_plant` as Parquet tables and `fact_daily_demand` as a Parquet table **partitioned by month**
+(`PARTITIONED BY (demand_month)`, one directory per month). Statistics are collected with `ANALYZE TABLE`.
+
+```bash
+python -m aapurti.pipeline.warehouse --lake data/lake --out data/warehouse
+```
+
+It runs three analytics queries in **Spark SQL**: top category per plant (`RANK()` over a window, with share of the plant's units),
+month-over-month growth (`LAG`), and a trailing 7-day average (window frame). It also reads the physical plan to show that a
+single-month query uses a partition filter instead of scanning every partition.
+
+`tests/test_warehouse.py` checks every figure against an independent pandas calculation (row counts, partition per month, growth,
+top category and share, rolling average, pruning). Limits: this is Spark's local Hive metastore on one machine, not a Hadoop or
+Hive cluster, and not Redshift, Impala or EMR.
+
 ## Publishing and live demo
 
 The repo is published at https://github.com/HxrshRaj/Aapurti and deployed on Render at https://aapurti.onrender.com
